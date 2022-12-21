@@ -1,0 +1,43 @@
+{% extends "base.html" %}        
+
+{% block pageBase %}
+        <h1> Esto seria la lista de Ingresos y Gastos</h1>
+        <p> Un simulacro de contabilidad</p>
+
+         
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Fecha</th>
+                    <th>Concepto</th>
+                    <th>Cantidad</th>
+                    <th>acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in lista %}{# se repetira toda estructura dentro #}
+                <tr>
+                    <td>{{item[0]}}</td>
+                    <td>{{item[1]}}</td>
+                    <td>€{{item[2]}}</td>
+                    <td>€{{item[3]}}</td>
+                    <td>
+                        <a href="/update/"{{item[0]}}>Eliminar</a>
+                        <a href="/edit/"{{item[0]}}>Modificar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table> 
+
+        <a href="/new">Nuevo</a>
+{% endblock %}        
+
+    
+   
+   
+
+   
+    
