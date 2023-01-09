@@ -14,6 +14,7 @@ def index():
     #recorrer el objeto csvReader y cargar cada registro al array datos
     for item in csvReader:
         datos.append(item)
+    fichero.close()    
     return render_template("index.html",pageTitle="Listas",lista=datos)
 
 
@@ -22,38 +23,33 @@ def create():
     if request.method == "GET":#esto puede ser POST o GET
         return render_template("new.html",pageTitle="Alta",typeAction="Alta",typeButon="Guardar",dataForm={})   
     else:
-        #acceder al archivo y configurarlo para cargar un nuevo registro
-        mifichero =  open('data/movimientos.csv','a',newline='')
-        #llamamos al metodo writer de escritura y cargamos el formeto para csv
-        lectura= csv.writer(mifichero, delimiter=',',quotechar='"')
-        
+
         error = validateForm(request.form)#validamos los datos de formulario
 
         if error:
             #hay error
             return render_template("new.html",pageTitle="Alta",typeAction="Alta",typeButon="Guardar",msgError=error,dataForm=request.form)
         else: 
-            #no hay errores lo registramos
-            #registramos los datos recibidos desde el formulario con request.form y lo añadimos con el metodo writerrow
-            #acceder al archivo y configurarlo para cargar un nuevo registro
+
+           
             mifichero =  open('data/movimientos.csv','a',newline='')
-            #llamamos al metodo writer de escritura y cargamos el formeto para csv
             lectura= csv.writer(mifichero, delimiter=',',quotechar='"')
-            lectura.writerow([request.form['date'],request.form['concept'],request.form['quantity']])    
-
+            
             #crear id
-            fichero = open("data/movimientos.csv","r")
-            csvReader = csv.reader(fichero,delimiter=",",quotechar='"')   
-
-
-
-            lectura.writerow([request.form['date'],request.form['concept'],request.form['quantity']])
+            fichero = open("data/last_id.csv","r")
+            registro = fichero.read()
+            if registro == "":
+                new_id=1
+            else:    
+                new_id = int(registro)+1
             
-            
-            
+            fichero.close()
 
+            ficheroG =  open('data/last_id.csv','w')
+            ficheroG.write(str(new_id))
+            ficheroG.close()
 
-
+            lectura.writerow([new_id,request.form['date'],request.form['concept'],request.form['quantity']])    
 
         mifichero.close()
 
@@ -64,21 +60,48 @@ def create():
    
 @app.route("/update/<int:id>")
 def edit(id):
-    pass
+    return render_template("update.html",pageTitle="Modificación",typeAction="Modificación",typeButon="Editar",dataForm={}) 
+    #return f"este es el id={id} del registro a modificar"
 
-
-
-
-
-    #return render_template("update.html",pageTitle="Modificación",typeAction="Modificación",typeButon="Editar") 
-
-@app.route("/delete/<int:id>")
+@app.route("/delete/<int:id>", methods=["GET","POST"])
 def remove(id):
-    pass
+
+    #1-consultar en data/movimientos.csv y recuperar el registro con id de la peticion
+    #2-devolver al formulario html para borrar que los campos no sean modificables
+    #3-tendria un boton para confirmar el borrado, si da accion a este boton borrar el registro dado
+    if request.method == "GET":
+
+        mifichero =  open('data/movimientos.csv','r')
+        lectura= csv.reader(mifichero, delimiter=',',quotechar='"')
+        registro_buscado=[]#len 0
+        for registro in lectura:
+            if registro[0] == str(id):
+                #aqui encuentra el dato
+                registro_buscado = registro
+        mifichero.close()
+        #que hacemos si no encuentra registro
+
+        if len(registro_buscado) > 0:
+            return render_template("delete.html",pageTitle="Eliminar",registros=registro_buscado)
+        else:
+           return redirect("/")
+    else:#aqui seria post
+        return f"Debemos de borrar el archivo con este id={id}"
+        '''
+        fichero_old =  open('data/movimientos.csv','r')
+        fichero = open('data/movimientos_new.csv','w',newline="")
+        csvReader= csv.reader(fichero_old, delimiter=',',quotechar='"')
+        csvWriter = csv.writer( fichero , delimiter=',',quotechar='"')
+        for registro in csvReader:
+            if registro[0] != str(id):#mientras el id sea distinto del proporcionado para borrar que escriba en fichero
+                csvWriter.writerow(registro)
+        fichero_old.close()
+        fichero.close()    
+        return redirect("/")     
+        '''
 
 
 
-    #return render_template("delete.html",pageTitle="Eliminar")
 
 #crear una funcion para validar formulario de registro donde controlemos lo siguiente:
 #1-que la fecha no sea mayor a la actual
