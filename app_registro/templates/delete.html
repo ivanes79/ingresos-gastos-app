@@ -1,10 +1,24 @@
 {% extends "base.html" %}
+{% block pageBase %}
 
-{% block pagebase %}
+<table>
+    <tr>
+        <td>Fecha:</td>
+        <td>{{registros['date']}}</td>
+    </tr>
+    <tr>
+        <td>Concepto:</td>
+        <td>{{registros['concept']}}</td>
+    </tr>
 
-<h1>
-    Esto es la vista para eliminar registro
-</h1>
+    <tr>
+        <td>Cantidad:</td>
+        <td>{{registros['quantity']}}</td>
+    </tr>
+</table>
+<form action="/delete/{{registros['id']}}" method="post">
+    <button type="submit">Borrar Registro</button>
+</form>
 
-
+<a href="/">Volver</a>
 {% endblock %}
